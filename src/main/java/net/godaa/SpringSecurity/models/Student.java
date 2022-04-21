@@ -1,4 +1,4 @@
-package net.godaa.SpringSecurity;
+package net.godaa.SpringSecurity.models;
 
 
 public class Student {

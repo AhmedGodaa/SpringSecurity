@@ -1,11 +1,13 @@
 package net.godaa.SpringSecurity.models;
 
 public enum EPermissions {
-    READ("student:read"),
-    WRITE("student:write"),
-    DELETE("student:delete");
+    STUDENT_READ("student:read"),
+    STUDENT_WRITE("student:write"),
+    STUDENT_DELETE("student:delete"),
+    COURSE_READ("course:read"),
+    COURSE_WRITE("course:write");
 
-    private String permission;
+    private final String permission;
 
     EPermissions(String permission) {
         this.permission = permission;

@@ -19,6 +19,8 @@ dependencies {
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
+
 }
 
 tasks.named('test') {

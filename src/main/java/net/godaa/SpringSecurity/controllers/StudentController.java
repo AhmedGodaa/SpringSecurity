@@ -1,5 +1,6 @@
-package net.godaa.SpringSecurity;
+package net.godaa.SpringSecurity.controllers;
 
+import net.godaa.SpringSecurity.models.Student;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
