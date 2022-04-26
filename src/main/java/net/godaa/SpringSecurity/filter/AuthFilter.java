@@ -17,7 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,29 +40,13 @@ public class AuthFilter extends UsernamePasswordAuthenticationFilter {
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
         return authenticationManager.authenticate(authentication);
     }
-
-//    or we can use attemptAuthentication like that
-//    So we need to make /payload/AuthRequest
-    /*
-@Override
-public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-    try {
-        AuthRequest authRequest = new ObjectMapper().readValue(request.getInputStream(), AuthRequest.class);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
-        return authenticationManager.authenticate(authentication);
-    } catch (IOException e) {
-        throw new RuntimeException(e);
-    }
-}
-*/
-
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         User user = (User) authResult.getPrincipal(); // get logged in user details
         Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
         String access_token = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
+                .withExpiresAt(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
                 .withIssuer(request.getRequestURL().toString())
 //                Claim mean header for json object 'roles': ['ROLE_USER', 'ROLE_ADMIN']
                 .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
@@ -70,7 +54,7 @@ public Authentication attemptAuthentication(HttpServletRequest request, HttpServ
 
         String refresh_token = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
+                .withExpiresAt(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
                 .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);
 
