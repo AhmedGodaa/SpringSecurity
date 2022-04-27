@@ -18,11 +18,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = AUTO)
     private Long id;
-
     private String username;
-
     private String email;
-
     private String password;
 
 @ManyToMany(fetch = FetchType.EAGER)

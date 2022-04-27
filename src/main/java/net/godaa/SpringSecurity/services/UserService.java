@@ -41,12 +41,6 @@ public class UserService implements UserDao, UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepo.findByUsername(username);
-//        if (user == null) {
-//            log.error("User not found");
-//            throw new UsernameNotFoundException("User " + username + " was not found in the database");
-//        } else {
-//            log.error("User is found");
-//        }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         user.getRoles().forEach(
                 role ->
@@ -58,6 +52,7 @@ public class UserService implements UserDao, UserDetailsService {
     @Override
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.getRoles().add(roleRepo.findByName("ROLE_USER"));
         return userRepo.save(user);
     }
 

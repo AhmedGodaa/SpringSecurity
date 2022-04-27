@@ -1,7 +1,7 @@
 package net.godaa.SpringSecurity.security;
 
-import net.godaa.SpringSecurity.filter.AuthFilter;
-import net.godaa.SpringSecurity.filter.AuthorizationFilter;
+import net.godaa.SpringSecurity.security.jwt.AuthFilter;
+import net.godaa.SpringSecurity.security.jwt.AuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,17 +40,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         AuthFilter authFilter = new AuthFilter(authenticationManagerBean());
-        authFilter.setFilterProcessesUrl("/api/login");
-
         http.csrf().disable();
+        authFilter.setFilterProcessesUrl("/api/login");
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().antMatchers("/api/login/**","token/refresh").permitAll();
+        http.authorizeRequests().antMatchers("/api/login").permitAll();
         http.authorizeRequests().antMatchers(GET, "/api/user/**").hasAuthority("ROLE_USER");
         http.authorizeRequests().antMatchers(GET, "/api/user/save/**").hasAuthority("ROLE_ADMIN");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(authFilter);
         http.addFilterBefore(new AuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-
     }
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {

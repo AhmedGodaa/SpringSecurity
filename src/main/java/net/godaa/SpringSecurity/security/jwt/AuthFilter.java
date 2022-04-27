@@ -1,9 +1,8 @@
-package net.godaa.SpringSecurity.filter;
+package net.godaa.SpringSecurity.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,14 +17,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
 import java.util.stream.Collectors;
 
+import static net.godaa.SpringSecurity.security.jwt.SecurityConstants.*;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
-@Slf4j
 public class AuthFilter extends UsernamePasswordAuthenticationFilter {
+
     private final AuthenticationManager authenticationManager;
 
     public AuthFilter(AuthenticationManager authenticationManager) {
@@ -40,31 +39,19 @@ public class AuthFilter extends UsernamePasswordAuthenticationFilter {
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
         return authenticationManager.authenticate(authentication);
     }
+
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        User user = (User) authResult.getPrincipal(); // get logged in user details
-        Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+        User user = (User) authResult.getPrincipal();
         String access_token = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
-                .withIssuer(request.getRequestURL().toString())
-//                Claim mean header for json object 'roles': ['ROLE_USER', 'ROLE_ADMIN']
+                .withIssuedAt(new Date())
+                .withExpiresAt(java.sql.Date.valueOf(LocalDate.now().plusDays(EXPIRATION_TIME)))
                 .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .sign(algorithm);
-
-        String refresh_token = JWT.create()
-                .withSubject(user.getUsername())
-                .withExpiresAt(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
-                .withIssuer(request.getRequestURL().toString())
-                .sign(algorithm);
-
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", access_token);
-        tokens.put("refresh_token", refresh_token);
-        response.setHeader("access-token", access_token);
-        response.setHeader("refresh-token", refresh_token);
+                .sign(Algorithm.HMAC256(KEY.getBytes()));
+        response.setHeader(HEADER_STRING, TOKEN_PREFIX + access_token);
         response.setContentType(APPLICATION_JSON_VALUE);
-        new ObjectMapper().writeValue(response.getOutputStream(), tokens);
+        new ObjectMapper().writeValue(response.getOutputStream(), access_token);
     }
 
 }
